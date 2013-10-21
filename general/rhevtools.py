@@ -24,8 +24,8 @@
 #
 
 
-version="0.1.3"
-lastchange="2013-10-01"
+version="0.1.4"
+lastchange="2013-10-21"
 homepage="http://github.com/RedHatEMEA/RHEV-Tools"
 author="Christian Bolz <cbolz at redhat dot com>"
 
@@ -573,7 +573,7 @@ class vm():
             exit(1)
 
         # check if logical network exists
-        nic_network=self.connect.networks.get(name=self.vmconfig['vnet'])
+        nic_network=self.connect.clusters.get(name=self.vmconfig['cluster']).networks.get(name=self.vmconfig['vnet'])
         if nic_network==None:
             print "Logical Netzwerk",self.vmconfig['vnet'],"not found"
             exit(1)
@@ -804,14 +804,18 @@ class cluster():
             current_vm = vm(v.name, vmconfig, connect)
             status=current_vm.status()
             current_vm=connect.vms.get(name=v.name)
-            current_hv=connect.hosts.get(id=v.get_host().get_id())
             ha=current_vm.get_placement_policy()
             if ha.host==None:
                 host="None"
             else:
                 host=connect.hosts.get(id=ha.host.id).name
-                
-            print name+";"+status+";"+current_hv.get_name()+";"+host
+            if status=="up":
+                current_hv=connect.hosts.get(id=v.get_host().get_id())
+                curhv=current_hv.get_name()
+            else:
+                curhv=None
+            curhv=str(curhv)                
+            print name+";"+status+";"+curhv+";"+host
 
             
 
